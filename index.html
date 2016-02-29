@@ -65,7 +65,7 @@
 		back-end framework.</p>
 		
 		<p class="lead">For the purposes of this tutorial, I am going to do all of the development of
-		the node.js server locally on my machine through localhost port 3000. Though I will migrate my app to the cloud
+		the node.js server locally on my machine through localhost port 3000. Though I could easily migrate my app to the cloud
 		at the end, the focus of this tutorial will be on development and not necessarily how to set up a virtual
 		machine in the cloud.</p>
 		
@@ -105,7 +105,7 @@
 		
 		<ul class="lead">
 			<li>Make sure that <b>node.js</b> is installed on your machine</li>
-			<li>Make sure you have a Spotify appliation created and registered</li>
+			<li>Make sure you have a Spotify appliation created and registered in <a href="https://developer.spotify.com/my-applications/">My Applications</a></li>
 			<li>Make sure you have your <b>Client ID</b> and your <b>Client Secret</b> from your application</li>
 			<li>Make sure you have a redirect URI for <b>http://localhost:3000/callback</b></li>
 		</ul>
@@ -367,7 +367,7 @@ app.listen(3000);
 			<ul class="lead">
 				<li>A <b>get</b> request is sent to the API endpoint <b>authorize</b></li>
 				<li>The <b>authorize</b> endpoint returns to the <b>redirect_uri</b> with the authorization code in the request</li>
-				<li>The authorization code is sent via a <b>post</b> ruquest to the API endpoint <b>api/token</b></li>
+				<li>The authorization code is sent via a <b>post</b> request to the API endpoint <b>api/token</b></li>
 				<li>Finally, the <b>access_token</b> is giving in the body of the response of the post</li>
 			</ul>
 		</p>
@@ -437,7 +437,7 @@ var authOptions = {
 		<h1>Tracks API</h1><br>
 		
 		<p class="lead">
-		Now that we've done all the hard stuff, building the APIs will be relatively easy.
+		Now that we've done all the hard stuff, building another endpoint call to the API will be relatively easy. There are many endpoints for this API. A reference library is available <a href="https://developer.spotify.com/web-api/endpoint-reference/">here</a>.
 		Paste the code below into server.js where the code says <code>/*API calls will go here*/</code>.
 		</p>
 		
@@ -472,12 +472,52 @@ app.get('/tracks/:token',function(req,res){
 		</pre>
 	
 		<p class="lead">
-		As we discussed earlier, we will make this call by passing in the access token as part of the
-		GET request. Since the token is a parameter of the get request, it is easily accessible to be
-		placed into and used for the tracks API. As we can see above, with this API, we have limited
-		the tracks to 10. Next, we have printed all ten of these track names to the console.
+		The endpoint for the user's saved track is <code>/v1/me/tracks</code>. As we discussed earlier, we will make this call by passing in the access token as part of the <b>get</b> request. Since the token is a parameter of the get request, it is easily accessible to be placed into and used for the tracks API. We can push the token in the parameter into the <b>access_token</b> variable with this code <code>var access_token = req.params.token;</code>. Similar to the API endpoint above, we must create an object to pass into the request. In this object, we must specify the url, headers (which include the <b>access_token</b>) and if it is a json document. You'll notice that for the URL, I added on a query parameter of <code>?limit=10</code>. This was just to limit the amount of tracks that returned, so that the amount of data that was pulled back for this demo was reasonable. Here is the code for the object:
 		</p>
-	
+		<pre>
+var options = {
+		url: 'https://api.spotify.com/v1/me/tracks?limit=10',
+		headers: { 'Authorization': 'Bearer ' + access_token },
+		json: true
+};
+		</pre>
+		<p class="lead">
+		Now that we have our object created, we can make the <b>get</b> request: <code>request.get(options, function(error, response, body) {...</code>. This <b>get</b> request will return a variable <b>body</b>, which will be the <b>json</b> object representing all the tracks that were returned. In order to find out the structure of this object, I looked at the reference guide for this endpoint <a href="https://developer.spotify.com/web-api/get-users-saved-tracks/">here</a>. Finally, just to demonstrate displaying some of the data that I just pulled back, I wrote a simple loop to get the names of the first 10 tracks in my saved songs on Spotify and print them to the console: 
+		<code>for(var i=0;i&lt;10;i++) console.log(body.items[i].track.name);</code> My output  looks like this: </p>
+		<pre>
+C:\nodeprojects\spot>
+C:\nodeprojects\spot>node server.js
+Listening on 3000...
+Sugar (feat. Francesco Yates)
+In The Morning Light - Radio Mix
+Prayer In C - Robin Schulz Radio Edit
+Sun Goes Down (feat. Jasmine Thompson) - Radio Mix
+No Rest For The Wicked - Robin Schulz Remix Edit
+Rather Be (feat. Jess Glynne) - Robin Schulz Edit
+We Don't Have To Take Our Clothes Off - Radio Mix
+Snowflakes - Radio Edit
+Crazy (feat. Joie Tan) - Radio Mix
+Waves - Robin Schulz Radio Edit
+		</pre>
+		
+		<p class="lead">
+		We will finish this code with a redirect back to the root of our server and put the <b>access_token</b> back into the URL so it can be used again:
+		</p>
+		
+		<pre>
+res.redirect('/#' +
+	querystring.stringify({
+		access_token: access_token
+}));
+		</pre>
+		
+		<p id="sect24"></p>
+		<br/><br/>
+		<h1>Add More APIs!</h1><br>
+		
+		<p class="lead">
+		Now that you have gotten the hang of using the <b>access_token</b> and creating objects to pass to the API, try applying what you've learned on to some more API endpoints. Thanks for tuning in and good luck!
+		</p>
 	
       </div>
 
