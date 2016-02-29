@@ -325,12 +325,9 @@ app.get('/login',function(req,res){
 		//post our new object to the token endpoint
 		request.post(authOptions, function(error, response, body) {
 			
+			//establish access token
 			var access_token = body.access_token;
-			var refresh_token = body.refresh_token;
-			
-			//document.getElementById("accessToken").textContent = access_token;
-			
-			
+
 			//push our new tokens to the browser
 			res.redirect('/#' +
 				querystring.stringify({
@@ -355,18 +352,74 @@ app.listen(3000);
 		</p>
 		
 		<p class="lead"><b>Part 2</b></p>
+		
 		<p class="lead">
-		With Part 2, things start to get interesting! First we have the server call a <b>get</b> request to the route <b>/login</b>. <code>app.get('/login',function(req,res){...</code> This works by the <b>app.get</b> function taking 2 arguments. The first arugment is the route and the second argument is a function, with request and result variables passed in as the two parameters. The rest of the code for this <b>login/</b> route will live inside of the function passed into this <b>app.get</b> request. Within Part 2, we establish an important variable <code>var scope</code>. This variable we will pass into the authorize endpoint in order to get authentication back.
+		For the next 3 parts, things start to get interesting! We will be setting up the authentication process, so that your app has a token to use to be able to make requests to the API. Simply put, the authentication process for the spotify API goes as follows: 
+			<ul class="lead">
+				<li>A <b>get</b> request is sent to the API endpoint <b>authorize</b></li>
+				<li>The <b>authorize</b> endpoint returns to the <b>redirect_uri</b> with the authorization code in the request</li>
+				<li>The authorization code is sent via a <b>post</b> ruquest to the API endpoint <b>api/token</b></li>
+				<li>Finally, the <b>access_token</b> is giving in the body of the response of the post</li>
+			</ul>
+		</p>
+		
+		
+		<p class="lead">
+		First we have the server call a <b>get</b> request to the route <b>/login</b> with the code <code>app.get('/login',function(req,res){...</code> This works by the <b>app.get</b> function taking 2 arguments. The first arugment is the route and the second argument is a function, with request and result variables passed in as the two parameters. The rest of the code for this <b>login/</b> route will live inside of the function passed into this <b>app.get</b> request. Also within Part 2, we establish an important variable <code>var scope</code>. This variable we will pass into the authorize endpoint in order to get authentication back. You can learn more about scopes within this API <a href="https://developer.spotify.com/web-api/using-scopes/">here</a>. For now, set the <b>scope</b> variable equal to the value in the code above. 
 		</p>
 		
 		<p class="lead"><b>Part 3</b></p>
-		<p class="lead">Part 3 is the redirect to the authorize endpoint of the API.</p>
+		<p class="lead">
+		It is time to make our first API endpoint request! We will initiate the <b>get</b>  request by redirecting to the <b>authorize</b> API endpoint with the code <code>res.redirect('https://accounts.spotify.com/authorize?'...</code>. We will be passing the following parameters to the API through the query string:
+		</p>
+		
+		<ul class="lead">
+			<li>response type (code, since we want code back)</li>
+			<li>client_id (which we already established at the top of our code)</li>
+			<li>scope (which we established on Part2)</li>
+			<li>redirect_uri (which we also established at the top of our code)</li>
+		</ul>
+		
+		<p class="lead">
+		We pass these into the query string by using the <code>querystring.stringify(...</code> function. The end result is:
+		</p>
+		
+		<pre>
+res.redirect('https://accounts.spotify.com/authorize?' +
+querystring.stringify({
+	response_type: 'code',
+	client_id: client_id,
+	scope: scope,
+	redirect_uri: redirect_uri
+}));
+		</pre>
 		
 		<p class="lead"><b>Part 4</b></p>
-		<p class="lead">Part 4 is the callback the api/token.</p>
+		
+		<p class="lead">
+		After we sent off our request to the <b>athorize</b> endpoint, the request should return to the <b>redirect_uri</b> that we passed into the request. Since we passed in <b>'http://localhost:3000/callback'</b>, we will set up a <b>get</b> request at that route in our file with the code <code>app.get('/callback', function(req, res){...</code>. Once again, we are using a <b>get</b> call, with has 2 parameters, one for the route and the other for the function that executes (which has 2 parameters itself: one for the request and one for the resopnse). The first thing that we do within our function is to create an object called <code>var authOptions = {...</code>. This object will store all of the information that we need to post to our <b>api/token</b> endpoint, including the URI of the endpoint. All the items in the object are string constants or established in the above code, except for the field <b>code</b> within the <b>form</b> object. For the <b>code</b> field, we will load it with the authorization code that came back from the <b>authorize</b> endpoint by using <code>req.query.code</code>. The final <b>authOptions</b> object looks like this:
+		</p>
+		<pre>
+var authOptions = {
+	url: 'https://accounts.spotify.com/api/token',
+	form: {
+		code: req.query.code,
+		redirect_uri: redirect_uri,
+		grant_type: 'authorization_code'
+	},
+	headers: {
+		'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
+	},
+	json: true
+};
+		</pre>
 		
 		<p class="lead"><b>Part 5</b></p>
-		<p class="lead">Part 5 is where the authorization gets posted and the access token is received.</p>
+
+		<p class="lead">
+			On to Part 5, so we can wrap this authorization part up! This section of code takes the <b>authOptions</b> object that we created earlier a executes a <b>post</b> request the endpoint specified within the object. Within the body of that response will be the access token that we were working toward attaining the entire time. Finally, we redirect the site to the root and push the <b>access_token</b> into the query string so it can be used by the browser to make calls to other APIs. We push the <b>access_token</b> into the query string with the code <code>res.redirect('/#' + querystring.stringify({access_token:access_token}));</code>.
+		</p>
+
 		
 		<p class="lead"></p>
 		
