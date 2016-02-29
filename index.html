@@ -42,8 +42,8 @@
             <li><a href="#sect12">Support Files</a></li>
             <li><a href="#sect16">server.js File</a></li>
             <li><a href="#sect20">Tracks API</a></li>
-            <li><a href="#sect24">Albums API</a></li>
-            <li><a href="#sect28">Artists API</a></li>
+            <!--<li><a href="#sect24">Albums API</a></li>
+            <li><a href="#sect28">Artists API</a></li>-->
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -80,8 +80,8 @@
 			be communicating with the API.</li>
 			<li><b>server.js</b> - This is the node.js file that will be communicating with the Spotify Web API. </li>
 			<li><b>Tracks API</b> - This function within server.js will show how to communicate with the tracks API.</li>
-			<li><b>Albums API</b> - This function within server.js will show how to communicate with the albums API.</li>
-			<li><b>Artists API</b> - This function within server.js will show how to communicate with the artists API.</li>
+			<!--<li><b>Albums API</b> - This function within server.js will show how to communicate with the albums API.</li>
+			<li><b>Artists API</b> - This function within server.js will show how to communicate with the artists API.</li>-->
 		</ul>
 		
 		<p class="lead"> Hopefully you find this guide helpful!</p>
@@ -169,7 +169,8 @@
 }
 		</pre>
 		
-		<p class="lead">Now that we have the file <b>package.json</b> in this directory we can run 
+		<p class="lead">
+		Now that we have the file <b>package.json</b> in this directory we can run 
 		<code>npm install</code> in order to install all of the node modules on this machine. 
 		To run <code>npm install</code>, we will need to open the command prompt (if you are not 
 		already in it). For Windows, the command prompt can be opened by pressing Windows+R, then
@@ -180,14 +181,18 @@
 		the command prompt should display to you details regarding each of the four modules 
 		that were loaded onto your machine. You could be able to navigate to the new 
 		<b>node_modules</b> directory by entering <code>cd node_modules</code> in the command prompt
-		and then hitting Enter. You may close out of the command prompt now.</p>
+		and then hitting Enter. You may close out of the command prompt now.
+		</p>
 		
-		<p class="lead"> The last file we are going to create before we get to the star of the show 
+		<p class="lead">
+		The last file we are going to create before we get to the star of the show 
 		is going to be the <b>helper.js</b> file. This file's primary purpose is to help us with our
-		routes and storing/accessing our access token (which we will get into later). Since the goal of
+		routes and storing/accessing our access token (which we will get into later). I found that very little
+		work can be done with this API without having an access token. Since the goal of
 		this tutorial was to focus on the back-end interface, with the API, I took some "short-cuts"
 		on the front end in order to keep the code as simple as possible. Create a new text file in
-		our <b>spot</b> directory, rename it <b>helper.js</b>, and paste the code in below.</p>
+		our <b>spot</b> directory, rename it <b>helper.js</b>, and paste the code in below.
+		</p>
 		
 		<pre><!--helper.js-->
 //Part 1: establish listeners
@@ -237,9 +242,24 @@ function getToken(){
 }
 		</pre>
 		
-		<p class="lead">Part 1 of the code above simply establishes listeners.
-		Part 2 of the code above pulls the access token out of the URL so that it
-		can be used by routes.</p>
+		<p class="lead">
+		Part 1 of the code above simply establishes listeners. We have a listener for each one
+		of our buttons. We have a <b>Login</b> button and a
+		<b>Get Token</b> button and also buttons that demonstrate each of the APIs.
+		The listener for login simply points to the "/login" route. The rest of the listeners depend on Part 2 of the code.
+		</p>
+		
+		<p class="lead">
+		Part 2 of the code above pulls the access token out of the URL so that it can be used by routes.
+		The <b>Get Token</b> button looks at the current URL of the page to see if the <b>access_token</b> is available in
+		the query string. If it is available, the function that is run when the <b>Get Token</b> button is clicked will
+		copy that string into the HTML page within the paragraph <code>id="accessToken"</code>. Finally, whenever one of the
+		API buttons is clicked, the route that is taken will include the <b>access_token</b>. For example, if the access_token is
+		currently <code>xyzACCESSTOKENxyz</code>, and we can see that token in the URL, when the <b>Get Token</b> button is pushed
+		the token will be copied into the HTML page. Then, when the <b>Run Tracks API</b> button is pushed, the route 
+		<code>/tracks/xyzACCESSTOKENxyz</code> will run. I set up this tutorial this way because each API requires an
+		access token to be able to run.
+		</p>
 		
 		<p id="sect16"></p>
 		<br/><br/>
@@ -251,6 +271,7 @@ function getToken(){
 		Rename this file <b>server.js</b>, paste in the code below, and save.</p>
 		
 		<pre><!--server.js-->
+//Part 1
 //node.js libraries that are required
 var express = require('express'); // Express web server framework
 var request = require('request'); // "Request" library
@@ -264,6 +285,7 @@ var app = express(); //initiates express
 
 app.use(express.static(__dirname)); //searches the current directory for html
 
+//Part 2
 //this route will run when login is clicked
 app.get('/login',function(req,res){
 	
@@ -272,6 +294,7 @@ app.get('/login',function(req,res){
 	scope += ' user-read-email'
 	scope += ' user-library-read'
 	
+	//Part 3
 	//call the authorize endpoint
 	res.redirect('https://accounts.spotify.com/authorize?' +
 	querystring.stringify({
@@ -281,6 +304,7 @@ app.get('/login',function(req,res){
 		redirect_uri: redirect_uri
 	}));
 	
+	//Part 4
 	//route to our redirect uri
 	app.get('/callback', function(req, res){
 		
@@ -298,6 +322,7 @@ app.get('/login',function(req,res){
 			json: true
 		};
 		
+		//Part 5
 		//post our new object to the token endpoint
 		request.post(authOptions, function(error, response, body) {
 			
@@ -315,21 +340,75 @@ app.get('/login',function(req,res){
 		});
 	});
 });
+
+/*API calls will go here*/
+
+console.log("Listening on 3000...");
+app.listen(3000);
 		</pre>
 		
+		<p class="lead">Let's break this code down part by part.</p>
+		<p class="lead">Part 1 is all the libraries that this code needs to function.
+		Express is the primary module that we utilize.</p>
+		<p class="lead">Part 2 is the login route, that will kick-off the process of authentication.</p>
+		<p class="lead">Part 3 is the redirect to the authorize endpoint of the API.</p>
+		<p class="lead">Part 4 is the callback the api/token.</p>
+		<p class="lead">Part 5 is where the authorization gets posted and the access token is received.</p>
+		
 		<p class="lead"></p>
-		<p class="lead"></p>
-		<p class="lead"></p>
-		<p class="lead"></p>
-		<p class="lead"></p>
-		<p class="lead"></p>
-		<p class="lead"></p>
+		
+		<p id="sect20"></p>
+		<br/><br/>
+		<h1>Tracks API</h1><br>
+		
+		<p class="lead">
+		Now that we've done all the hard stuff, building the APIs will be relatively easy.
+		Paste the code below into server.js where the code says <code>/*API calls will go here*/</code>.
+		</p>
+		
+		<pre><!--server.js#tracks-->
+app.get('/tracks/:token',function(req,res){
+	
+	//get token from request
+	var access_token = req.params.token;
+	
+	//set up options
+	var options = {
+		url: 'https://api.spotify.com/v1/me/tracks?limit=10',
+		headers: { 'Authorization': 'Bearer ' + access_token },
+		json: true
+	};
+	
+	// use the access token to access the Spotify Web API
+	request.get(options, function(error, response, body) {
+
+		//print 10 track names to console
+		for(var i=0;i<10;i++) console.log(body.items[i].track.name);
+	});
+	
+	//put token back into browser
+	res.redirect('/#' +
+		querystring.stringify({
+			access_token: access_token
+	}));
+});
+		</pre>
+		</pre>
+		</pre>
+	
+		<p class="lead">
+		As we discussed earlier, we will make this call by passing in the access token as part of the
+		GET request. Since the token is a parameter of the get request, it is easily accessible to be
+		placed into and used for the tracks API. As we can see above, with this API, we have limited
+		the tracks to 10. Next, we have printed all ten of these track names to the console.
+		</p>
+	
 	
       </div>
 
     </div><!-- /.container -->
-
-
+		
+		
 
   </body>
   
