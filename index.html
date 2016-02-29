@@ -115,14 +115,13 @@
 		<h1>Support Files</h1><br>
 		
 		<p class="lead">Now that you've got some light experience with the API and node.js, 
-		let's start building our app! We will start by creating the below files/directory:<p>
+		let's start building our app! We will start by creating the below support files/directory:<p>
 		
 		<ul class="lead">
 			<li>spot (directory)</li>
 			<li>index.html (html file)</li>
 			<li>package.json (Javascript object notation file)</li>
 			<li>helper.js (Javascript file)</li>
-			<li>server.js (Javascript file)</li>
 		</ul>
 		
 		<p class="lead"> First, we will create a directory somewhere on our local or virtual machine. My directory
@@ -277,8 +276,8 @@ var express = require('express'); // Express web server framework
 var request = require('request'); // "Request" library
 var querystring = require('querystring');
 
-var client_id = '687e27d01d4841668d80f56e78cee04a'; // Your client id
-var client_secret = '484d47ba31c24967ae35071e62fdf3e4'; // Your client secret
+var client_id = 'YOUR_CLIENT_ID_GOES_HERE'; // Your client id
+var client_secret = 'YOUR_CLIENT_SECRET_GOES_HERE'; // Your client secret
 var redirect_uri = 'http://localhost:3000/callback'; // Your redirect uri
 
 var app = express(); //initiates express 
@@ -348,11 +347,25 @@ app.listen(3000);
 		</pre>
 		
 		<p class="lead">Let's break this code down part by part.</p>
-		<p class="lead">Part 1 is all the libraries that this code needs to function.
-		Express is the primary module that we utilize.</p>
-		<p class="lead">Part 2 is the login route, that will kick-off the process of authentication.</p>
+		
+		<p class="lead"><b>Part 1</b></p>
+		<p class="lead">
+		Part 1 is all the libraries that this code needs to function. All of these libraries should be installed in your <b>spot/node_modules</b> directory. <b>Express</b> is the web application framework for Node.js that we will use to handle the set-up of our server and our routing. We include the <b>express</b> library with the code <code>var express = require('express');</code> and initiate the web application with <code>var app = express();</code>. We also utilize the libraries <b>request</b> and <b>querystring</b> and include them with the code <code>var request = require('request');</code> and <code>var querystring = require('querystring');</code>, respectively. Next, we have string variables for <b>client_id</b> and <b>client_secret</b>. You should substitute the text 
+		<code>YOUR_CLIENT_ID_GOES_HERE</code> with the text string of your client id by going to <a href="https://developer.spotify.com/my-applications/">My Applications</a> and copying your client id. You should do the same with the text <code>YOUR_CLIENT_SECRET_GOES_HERE</code> with the client secret. The next variable is the <b>redirect_uri</b>, which we will set to be <code>var redirect_uri = 'http://localhost:3000/callback';</code> so that when the authentication redirects back to our site (discussed below), it goes to this handler. Finally, we have the code <code>app.use(express.static(__dirname));</code>, which instructs the server to look in this directory (ie. <b>spot</b>) to find the static html files to load when this <b>server.js</b> file is up and running.
+		</p>
+		
+		<p class="lead"><b>Part 2</b></p>
+		<p class="lead">
+		With Part 2, things start to get interesting! First we have the server call a <b>get</b> request to the route <b>/login</b>. <code>app.get('/login',function(req,res){...</code> This works by the <b>app.get</b> function taking 2 arguments. The first arugment is the route and the second argument is a function, with request and result variables passed in as the two parameters. The rest of the code for this <b>login/</b> route will live inside of the function passed into this <b>app.get</b> request. Within Part 2, we establish an important variable <code>var scope</code>. This variable we will pass into the authorize endpoint in order to get authentication back.
+		</p>
+		
+		<p class="lead"><b>Part 3</b></p>
 		<p class="lead">Part 3 is the redirect to the authorize endpoint of the API.</p>
+		
+		<p class="lead"><b>Part 4</b></p>
 		<p class="lead">Part 4 is the callback the api/token.</p>
+		
+		<p class="lead"><b>Part 5</b></p>
 		<p class="lead">Part 5 is where the authorization gets posted and the access token is received.</p>
 		
 		<p class="lead"></p>
