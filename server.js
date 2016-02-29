@@ -13,6 +13,6 @@ app.get('/', function(req, res) {
 
 });
 
-console.log("running on 3500...")
+console.log("Running on 3200...")
 
-app.listen(3500);
+app.listen(3200);
